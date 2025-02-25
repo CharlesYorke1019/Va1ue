@@ -1,7 +1,7 @@
 import { View, KeyboardAvoidingView, Platform, TextInput, Text, TouchableOpacity} from "react-native";
 import { useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome'
-import socket from "./socket";
+import socket from "../models/socket";
 
 export function Register({position, setPosition}) {
 

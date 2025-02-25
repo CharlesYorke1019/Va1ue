@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize) => {
 
         committedStamp: {
             type: Sequelize.DATE
+        },
+
+        url: {
+            type: Sequelize.STRING
         }
 
     })

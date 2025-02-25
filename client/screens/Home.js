@@ -1,16 +1,19 @@
 import { SafeAreaView, View, Text, TouchableOpacity, Animated } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
 import socket from "../models/socket";
-import Menu from "@/components/menu";
 import Icon from 'react-native-vector-icons/Entypo'
-import { Provider } from "react-redux";
-import { store } from "@/models/store";
+// import { Provider } from "react-redux";
+// import { store } from "@/models/store";
+import { useNavigation } from '@react-navigation/native'
+import { store } from "../models/store";
+
 
 export function Home() {
 
-    const [menuDisplay, setMenuDisplay] = useState<boolean>(false);
+    const navigation = useNavigation();
+
+    const [menuDisplay, setMenuDisplay] = useState(false);
     const [menuAnimation, setMenuAnimation] = useState(false);
 
     const leftValue = useState(new Animated.Value(0))[0];
@@ -22,13 +25,11 @@ export function Home() {
 
     }
 
-    function navigatate(page) {
+    function navigate() {
 
         socket.emit('joinRoomEmit');
 
-        router.push({
-            pathname: page
-        })
+        navigation.navigate('FeedDisplay')
 
     }
 
@@ -63,15 +64,10 @@ export function Home() {
         }
     };
 
-    // console.log(alertsHolder.payload[0].location);
-
     return (
-        <Provider store={store}>
         <SafeAreaView style={{width: '100%', height: '100%', backgroundColor: 'black'}}>
 
             <View style={{height: '100%', width: '100%', backgroundColor: 'black'}}>
-
-                <Menu display={menuDisplay} leftValue={leftValue} toggleMenuFunc={toggleMenu} />
 
                 <TouchableOpacity style={{position: 'absolute', top: '2.5%', left: '10%', display: !menuDisplay ? 'flex' : 'none'}}
                     onPress={() => toggleMenu()}
@@ -82,7 +78,7 @@ export function Home() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '20%', borderWidth: 1, borderColor: 'white'}}
-                    onPress={() => navigatate('/feedDisplay')}
+                    onPress={() => navigate()}
                 >
                     <Text style={{textAlign: 'center', fontSize: 16, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 5, paddingBottom: 5, fontFamily: 'Baskerville-Bold'}}>NCAA Basketball</Text>
                 </TouchableOpacity>
@@ -94,7 +90,6 @@ export function Home() {
             </View>
 
         </SafeAreaView>
-        </Provider>
 
     )
 

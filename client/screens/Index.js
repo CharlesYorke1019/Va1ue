@@ -1,7 +1,7 @@
 import { View, SafeAreaView, Text, TouchableOpacity, TextInput, Keyboard, KeyboardAvoidingView, Platform } from 'react-native';
 import { useState } from 'react';
-import LogIn from '@/components/logIn';
-import Register from '@/components/register';
+import { LogIn } from '../components/LogIn';
+import { Register } from '../components/Register';
 
 export function Index({}) {
 

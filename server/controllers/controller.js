@@ -94,6 +94,26 @@ exports.getUsers = (req, res) => {
     });
 }
 
+exports.createTestUser = (req, res) => {
+
+    const hash = bycrypt.hashSync('Password', 12);
+
+    const user = {
+        email: 'user1',
+        password: hash,
+    };
+
+    User.create(user).then(data => {
+        res.send({
+            message: 'Success',
+            data: data
+        })
+    }).catch(err => {
+        return 'Error'
+    })
+
+}
+
 exports.feed = async (req, res) => {
     axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
         let objsArr = data.data;
@@ -156,125 +176,6 @@ exports.feed = async (req, res) => {
 
     })
 }
-
-// exports.test = async (io) => {
-
-//     const clients = io.sockets.adapter.rooms.get('ncaa_basketball');
-
-//     if (clients) {
-
-//         const data1  = await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4');
-
-//         let objArr = data1.data;
-
-//         let message = '';
-//         let array = [];
-//         let totalNotifications = 0;
-
-//         for (let i = 0; i < objArr.length; i++) {
-
-//             for (let j = 0; j < objArr[i].bookmakers.length; j++) {
-
-//                 if (objArr[i].bookmakers[j].markets[0].outcomes != undefined) {
-
-//                     let slipInfo = objArr[i].bookmakers[j].markets[0].outcomes;
-
-//                     let retrievedOdds = {
-//                         book: objArr[i].bookmakers[j].title,
-//                         team1: slipInfo[0].name,
-//                         team2: slipInfo[1].name,
-//                         team1Odds: slipInfo[0].price,
-//                         team2Odds: slipInfo[1].price,
-//                         identifier: objArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price
-//                     }
-
-//                     let finalObj = {};
-
-//                     await Odds.findOne({ where : { identifier : retrievedOdds.identifier } }).then(data2 => {
-
-//                         if (data2) {
-
-//                             let originalBetInfo = data2.dataValues;
-                            
-//                             let oddsChangeTeam1 = retrievedOdds.team1Odds - originalBetInfo.team1StartingOdds;
-//                             let oddsChangeTeam2 = retrievedOdds.team2Odds - originalBetInfo.team2StartingOdds;
-
-//                             if (originalBetInfo.id === 66) {
-//                                 console.log(originalBetInfo);
-//                                 console.log(oddsChangeTeam1);
-//                                 console.log(oddsChangeTeam2);
-//                             }
-
-//                             if (oddsChangeTeam1 >= 100 || oddsChangeTeam1 <= -100 && oddsChangeTeam2 >= 100 || oddsChangeTeam2 <= -100) {
-
-//                                 if (oddsChangeTeam1 >= 100 || oddsChangeTeam1 <= -100) {
-
-//                                     finalObj.team1 = retrievedOdds.team1;
-//                                     finalObj.team1OddsChange = oddsChangeTeam1;
-//                                     finalObj.team1OriginalOdds = originalBetInfo.team1StartingOdds;
-//                                     finalObj.team1UpdatedOdds = retrievedOdds.team1Odds;
-                                    
-//                                 }
-
-//                                 if (oddsChangeTeam2 >= 100 || oddsChangeTeam2 <= -100) {
-
-//                                     finalObj.team2 = retrievedOdds.team2;
-//                                     finalObj.team2OddsChange = oddsChangeTeam2;
-//                                     finalObj.team2OriginalOdds = originalBetInfo.team2StartingOdds;
-//                                     finalObj.team2UpdatedOdds = retrievedOdds.team2Odds;
-
-                                
-
-//                                 }
-
-//                                 finalObj.location = retrievedOdds.book;
-
-//                                 array.push(finalObj);
-
-//                                 totalNotifications++;
-
-//                             }
-
-//                             let updateObj = {
-//                                 team1LiveOdds: retrievedOdds.team1Odds,
-//                                 team2LiveOdds: retrievedOdds.team2Odds
-//                             }
-
-//                             Odds.update(updateObj, { where : { identifier : originalBetInfo.identifier } }).then(arr => {
-
-//                                 if (arr[0]) {
-
-//                                     return 'success';
-
-//                                 }
-
-//                             }).catch(err => {
-//                                 return;
-//                             })
-
-//                         }
-
-//                     })
-
-
-//                 }
-
-//             }
-
-//         }
-
-//         console.log(totalNotifications);
-
-//         console.log(array);
-
-//         io.to('ncaa_basketball').emit('receive_ping', JSON.parse(JSON.stringify(array)));
-
-//     } else {
-
-//         console.log('no point');
-
-//     }
-// }
 
 exports.test = async (io) => {
 
@@ -355,10 +256,12 @@ exports.test = async (io) => {
 
                                     info: finalObj,
                                     sent: false,
-                                    identifier: retrievedOdds.identifier,
-                                    committedStamp: currentDate
+                                    identifier: retrievedOdds.identifier + ':' + finalObj.team1OriginalOdds + ':' + finalObj.team2OriginalOdds,
+                                    committedStamp: currentDate,
+                                    url: finalObj.location === 'FanDuel' ? 'https://account.sportsbook.fanduel.com/sportsbook/' : finalObj.location === 'DraftKings' ? 'https://myaccount.draftkings.com/login' : 'https://account.sportsbook.fanduel.com/sportsbook/'
 
                                 }
+
 
                                 Notifications.count({ where : { identifier :  notificationObj.identifier } }).then(count => {
                                     
@@ -409,7 +312,11 @@ exports.test = async (io) => {
 
         }
 
-        await Notifications.findAll().then(data2 => {
+        await Notifications.findAll({
+            order: [
+                [`createdAt`, 'DESC']
+            ]
+        }).then(data2 => {
 
             data2.forEach((el, index) => {
 
@@ -424,26 +331,7 @@ exports.test = async (io) => {
         console.log(notificationArray.length);
 
         io.to('ncaa_basketball').emit('receive_ping', JSON.parse(JSON.stringify(array)), JSON.parse(JSON.stringify(notificationArray)));
-
-        let holderObj = {
-            sent: true
-        };
-
-        newNotificationsArray.forEach((el, index) => {
-
-            Notifications.update(holderObj, { where : { identifier : el.identifier } }).then(data2 => {
-
-                if (data2) {
-
-                    return 'Success'
-
-                }
-
-            })
-
-        })        
         
-
     } else {
 
         console.log('no point');
@@ -558,5 +446,31 @@ exports.getNotifications = async (req, res) => {
     }).catch(err => {
         return 'err';
     })
+
+}
+
+exports.scanNotifications = async () => {
+
+    let dateHolder = Date.now();
+    let currentDate = new Date(dateHolder);
+
+    let timeRange = currentDate.setMinutes(currentDate.getMinutes() - 20);
+
+    await Notifications.findAll().then(data => {
+ 
+        data.forEach((el) => {
+
+            if (el.dataValues.committedStamp < timeRange) {
+
+                Notifications.destroy({ where : { identifier : el.dataValues.identifier } }).then(data3 => {
+                    return 'Success'
+                })
+
+            }
+
+        })
+
+    })
+
 
 }

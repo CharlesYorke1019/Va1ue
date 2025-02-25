@@ -46,6 +46,8 @@ app.get(`/notifications`, controller.getNotifications);
 
 app.post(`/notifications`, controller.createNotifications);
 
+app.get(`/auth`, controller.createTestUser);
+
 io.on('connection', (socket) => {
 
     socket.on('register', async (userInfo) => {
@@ -68,6 +70,7 @@ io.on('connection', (socket) => {
 
 setInterval(async () => {
     controller.test(io);
+    controller.scanNotifications();
 }, 20000);
 
 db.sequelize.sync({

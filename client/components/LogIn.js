@@ -1,8 +1,9 @@
 import { View, KeyboardAvoidingView, Platform, TextInput, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome'
-import socket from "./socket";
+import socket from "../models/socket";
 import { router } from "expo-router";
+import { useNavigation } from '@react-navigation/native'
 
 export function LogIn({position, setPosition})   {
 
@@ -11,14 +12,14 @@ export function LogIn({position, setPosition})   {
     let suUsernameHolder;
     let suPasswordHolder;
 
+    const navigation = useNavigation();
+
     function userLogsIn() {
         socket.emit('logIn', {email: username, password: password})
     }
 
     socket.on('logInSuccessful', () => {  
-        router.push({
-          pathname: '/home'
-        });
+        navigation.navigate('Home')
     })
 
     return (

@@ -1,35 +1,38 @@
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
+
+import { Provider } from "react-redux";
+import { store } from "./models/store";
 
 import { Index } from "./screens/Index";
 import { Home } from "./screens/Home";
+import { FeedDisplay } from "./screens/FeedDisplay";
 
-const Stack = createNativeStackNavigator()
+const Stack = createStackNavigator();
 
 function App() {
-  const isLoadingComplete = useLoadedAssets();
-
-  if (!isLoadingComplete) {
-    return null;
-  } else {
-    return (
-      <Stack.Navigator screenOptions={{
-        headerShown: false,
-        gestureEnabled: false
-      }}>
-        <Stack.Screen name="index" component={Index} />
-        <Stack.Screen name="home" component={Home} />
+  return (
+    <Stack.Navigator screenOptions={{
+      headerShown: false,
+      gestureEnabled: false
+    }}>
 
 
-      </Stack.Navigator>
-    )
-  }
+      <Stack.Screen name="Index" component={Index} />
+      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="FeedDisplay" component={FeedDisplay} />
+
+
+    </Stack.Navigator>
+  )
 }
 
 export default () => {
   return (
     <NavigationContainer>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
     </NavigationContainer>
   )
 }
