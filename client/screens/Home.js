@@ -25,11 +25,11 @@ export function Home() {
 
     }
 
-    function navigate() {
+    function navigate(room, route) {
 
-        socket.emit('joinRoomEmit');
+        socket.emit('joinRoomEmit', room);
 
-        navigation.navigate('FeedDisplay')
+        navigation.navigate(route)
 
     }
 
@@ -78,12 +78,14 @@ export function Home() {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '20%', borderWidth: 1, borderColor: 'white'}}
-                    onPress={() => navigate()}
+                    onPress={() => navigate('basketball_ncaab', 'FeedDisplay1')}
                 >
                     <Text style={{textAlign: 'center', fontSize: 16, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 5, paddingBottom: 5, fontFamily: 'Baskerville-Bold'}}>NCAA Basketball</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '30%', borderWidth: 1, borderColor: 'white'}}>
+                <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '30%', borderWidth: 1, borderColor: 'white'}}
+                    onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
+                >
                     <Text style={{textAlign: 'center', fontSize: 16, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 5, paddingBottom: 5, fontFamily: 'Baskerville-Bold'}}>NBA Basketball</Text>
                 </TouchableOpacity>
 

@@ -115,7 +115,63 @@ exports.createTestUser = (req, res) => {
 }
 
 exports.feed = async (req, res) => {
-    axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+    await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+        let objsArr = data.data;
+
+        for (let i = 0; i < objsArr.length; i++) {
+
+            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
+
+                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
+
+                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
+
+                    let oddsObj = {
+                        book: objsArr[i].bookmakers[j].title,
+                        team1: slipInfo[0].name,
+                        team2: slipInfo[1].name,
+                        team1StartingOdds: slipInfo[0].price,
+                        team2StartingOdds: slipInfo[1].price,
+                        team1LiveOdds: slipInfo[0].price,
+                        team2LiveOdds: slipInfo[1].price,
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price
+                    }
+
+                    const exists = Odds.count({ where : { book : oddsObj.book } && { team1 : oddsObj.team1 } && { team2 : oddsObj.team2 } })
+
+                    // if (exists === 0) {
+
+                    //     Odds.create(oddsObj).then(data2 => {
+
+                    //         console.log('Success!')
+
+                    //     }).catch(err => {
+
+                    //         console.log('Error!')
+
+                    //     })
+
+                    // }
+
+                    Odds.create(oddsObj).then(data2 => {
+
+                        return data;
+
+                    }).catch(err => {
+
+                        console.log('Error!')
+
+                    })
+
+                }
+
+            }
+
+        }
+
+    })
+
+    await axiosApi().get('v4/sports/basketball_nba/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
         let objsArr = data.data;
 
         for (let i = 0; i < objsArr.length; i++) {
@@ -172,22 +228,20 @@ exports.feed = async (req, res) => {
         res.send({
             message: 'Success!'
         })
-        return;
 
     })
 }
 
-exports.test = async (io) => {
+exports.scanOdds = async (io, type) => {
 
-    const clients = io.sockets.adapter.rooms.get('ncaa_basketball');
+    const clients = io.sockets.adapter.rooms.get(type);
 
     if (clients) {
 
-        const data1  = await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4');
+        const data1  = await axiosApi().get(`v4/sports/${type}/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4`);
 
         let objArr = data1.data;
 
-        let message = '';
         let array = [];
         let totalNotifications = 0;
         let notificationArray = [];
@@ -258,7 +312,8 @@ exports.test = async (io) => {
                                     sent: false,
                                     identifier: retrievedOdds.identifier + ':' + finalObj.team1OriginalOdds + ':' + finalObj.team2OriginalOdds,
                                     committedStamp: currentDate,
-                                    url: finalObj.location === 'FanDuel' ? 'https://account.sportsbook.fanduel.com/sportsbook/' : finalObj.location === 'DraftKings' ? 'https://myaccount.draftkings.com/login' : 'https://account.sportsbook.fanduel.com/sportsbook/'
+                                    url: finalObj.location === 'FanDuel' ? 'https://account.sportsbook.fanduel.com/sportsbook/' : finalObj.location === 'DraftKings' ? 'https://myaccount.draftkings.com/login' : 'https://account.sportsbook.fanduel.com/sportsbook/',
+                                    type: type
 
                                 }
 
@@ -320,7 +375,11 @@ exports.test = async (io) => {
 
             data2.forEach((el, index) => {
 
-                notificationArray.push(el.dataValues);
+                if (el.dataValues.type === type) {
+
+                    notificationArray.push(el.dataValues);
+
+                }
 
                 // notificationArray.push(el.dataValues);
 
@@ -330,7 +389,7 @@ exports.test = async (io) => {
 
         console.log(notificationArray.length);
 
-        io.to('ncaa_basketball').emit('receive_ping', JSON.parse(JSON.stringify(array)), JSON.parse(JSON.stringify(notificationArray)));
+        io.to(type).emit('receive_ping', JSON.parse(JSON.stringify(notificationArray)));
         
     } else {
 
@@ -400,15 +459,15 @@ exports.getOdds = (req, res) => {
 
 }
 
-exports.handleUserJoiningRoom = (socket) => {
+exports.handleUserJoiningRoom = (socket, room) => {
     
-    socket.join('ncaa_basketball');
+    socket.join(room);
 
 }
 
-exports.handleUserLeavingRoom = (socket) => {
+exports.handleUserLeavingRoom = (socket, room) => {
     
-    socket.leave('ncaa_basketball');
+    socket.leave(room);
 
 }
 
@@ -454,7 +513,7 @@ exports.scanNotifications = async () => {
     let dateHolder = Date.now();
     let currentDate = new Date(dateHolder);
 
-    let timeRange = currentDate.setMinutes(currentDate.getMinutes() - 20);
+    let timeRange = currentDate.setMinutes(currentDate.getMinutes() - 3);
 
     await Notifications.findAll().then(data => {
  

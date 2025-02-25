@@ -58,8 +58,8 @@ io.on('connection', (socket) => {
         controller.logIn(socket, userInfo)
     })
 
-    socket.on('joinRoomEmit', async () => {
-        controller.handleUserJoiningRoom(socket);
+    socket.on('joinRoomEmit', async (room) => {
+        controller.handleUserJoiningRoom(socket, room);
     })
 
     socket.on('leaveRoomEmit', async () => {
@@ -69,7 +69,8 @@ io.on('connection', (socket) => {
 });
 
 setInterval(async () => {
-    controller.test(io);
+    controller.scanOdds(io, 'basketball_ncaab');
+    controller.scanOdds(io, 'basketball_nba');
     controller.scanNotifications();
 }, 20000);
 
