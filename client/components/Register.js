@@ -29,14 +29,14 @@ export function Register({position, setPosition}) {
             
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 15}}>
 
-                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%'}}>
-                    <Icon name="user" color={'white'} size={28} style={{padding: 5}} />
+                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%', borderRadius: 5}}>
+                    <Icon name="user" color={'white'} size={28} style={{paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10}} />
                 </View>
 
                 <TextInput 
                     value={suUsernameHolder}
                     onChangeText={(input) => setUsername(input)}
-                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville'}}
+                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville', borderRadius: 5}}
                     placeholder='Email'
                     placeholderTextColor={'grey'}
                     spellCheck={false}
@@ -47,13 +47,13 @@ export function Register({position, setPosition}) {
 
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 15}}>
 
-                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%'}}>
-                    <Icon name="lock" color={'white'} size={28} style={{padding: 5}} />
+                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%', borderRadius: 5}}>
+                    <Icon name="lock" color={'white'} size={28} style={{paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10}} />
                 </View>
                 <TextInput 
                     value={suPasswordHolder}
                     onChangeText={(input) => setPassword(input)}
-                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville'}}
+                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville', borderRadius: 5}}
                     placeholder='Password'
                     placeholderTextColor={'grey'}
                     secureTextEntry={true}
@@ -67,13 +67,13 @@ export function Register({position, setPosition}) {
 
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>
 
-                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%'}}>
-                    <Icon name="lock" color={'white'} size={28} style={{padding: 5}} />
+                <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%', borderRadius: 5}}>
+                    <Icon name="lock" color={'white'} size={28} style={{paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10}} />
                 </View>
                 <TextInput 
                     value={suConfirmPasswordHolder}
                     onChangeText={(input) => setConfirmPassword(input)}
-                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville'}}
+                    style={{width: 200, height: 40, borderWidth: 1, backgroundColor: 'white', alignSelf: 'center', textAlign: 'center', fontFamily: 'Baskerville', borderRadius: 5}}
                     placeholder='Confirm Password'
                     placeholderTextColor={'grey'}
                     secureTextEntry={true}

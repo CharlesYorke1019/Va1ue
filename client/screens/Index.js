@@ -21,13 +21,13 @@ export function Index({}) {
               Value
             </Text>
     
-            <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', position: 'absolute', top: '30%', left: '22.5%', width: '25%', opacity: startScreenPosition === 0 ? 1 : 0.5}}
+            <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', position: 'absolute', top: '30%', left: '22.5%', width: '25%', opacity: startScreenPosition === 0 ? 1 : 0.5, borderRadius: 5}}
               onPress={() => changePosition(0)}
             >
               <Text style={{color: 'white', fontFamily: 'Baskerville', fontSize: 18, textAlign: 'center', paddingTop: 7, paddingBottom: 7}}>Log In</Text>
             </TouchableOpacity>
     
-            <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', position: 'absolute', top: '30%', left: '52.5%', width: '25%', opacity: startScreenPosition === 1 ? 1 : 0.5}}
+            <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', position: 'absolute', top: '30%', left: '52.5%', width: '25%', opacity: startScreenPosition === 1 ? 1 : 0.5, borderRadius: 5}}
               onPress={() => changePosition(1)}
             >
               <Text style={{color: 'white', fontFamily: 'Baskerville', fontSize: 18, textAlign: 'center', paddingTop: 7, paddingBottom: 7}}>Register</Text>

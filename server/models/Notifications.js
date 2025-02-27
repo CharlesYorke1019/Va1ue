@@ -17,7 +17,7 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.DATE
         },
 
-        url: {
+        link: {
             type: Sequelize.STRING
         },
 

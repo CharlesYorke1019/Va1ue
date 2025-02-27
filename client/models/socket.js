@@ -10,7 +10,7 @@ const makeId = (length) => {
     return result;
 }
 
-const socket = io("http://192.168.1.213:8000", {
+const socket = io("http://192.168.1.216:8000", {
     recconection: true, 
     recconectionAttempts: Infinity,
     extraHeaders: {

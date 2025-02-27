@@ -1,12 +1,10 @@
 import { SafeAreaView, View, Text, TouchableOpacity, Animated } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router";
 import socket from "../models/socket";
 import Icon from 'react-native-vector-icons/Entypo'
-// import { Provider } from "react-redux";
-// import { store } from "@/models/store";
 import { useNavigation } from '@react-navigation/native'
 import { store } from "../models/store";
+import { Menu } from "../components/Menu";
 
 
 export function Home() {
@@ -69,7 +67,9 @@ export function Home() {
 
             <View style={{height: '100%', width: '100%', backgroundColor: 'black'}}>
 
-                <TouchableOpacity style={{position: 'absolute', top: '2.5%', left: '10%', display: !menuDisplay ? 'flex' : 'none'}}
+                <Menu display={menuDisplay} setMenuDisplay={setMenuDisplay} toggleMenuFunc={toggleMenu} leftValue={leftValue} />
+
+                <TouchableOpacity style={{position: 'absolute', top: '4%', left: '10%', opacity: menuDisplay ? 0.5 : 1}}
                     onPress={() => toggleMenu()}
                 >
 
@@ -77,17 +77,42 @@ export function Home() {
 
                 </TouchableOpacity>
 
-                <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '20%', borderWidth: 1, borderColor: 'white'}}
-                    onPress={() => navigate('basketball_ncaab', 'FeedDisplay1')}
-                >
-                    <Text style={{textAlign: 'center', fontSize: 16, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 5, paddingBottom: 5, fontFamily: 'Baskerville-Bold'}}>NCAA Basketball</Text>
-                </TouchableOpacity>
+                <Text style={{color: 'white', alignSelf: 'center', fontFamily: 'Baskerville-Bold', position: 'absolute', top: '15%', fontSize: 42, opacity: menuDisplay ? .5 : 1}}>Channels</Text>
 
-                <TouchableOpacity style={{position: 'absolute', alignSelf: 'center', top: '30%', borderWidth: 1, borderColor: 'white'}}
-                    onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
-                >
-                    <Text style={{textAlign: 'center', fontSize: 16, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 5, paddingBottom: 5, fontFamily: 'Baskerville-Bold'}}>NBA Basketball</Text>
-                </TouchableOpacity>
+                <View style={{width: '95%', display: 'flex', flexDirection: 'row', alignSelf: 'center', position: 'absolute', top: '25%', borderTopWidth: 1, borderBottomWidth: 1, borderColor: 'white', borderRadius: 10, flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center', opacity: menuDisplay ? .5 : 1}}>
+
+                    <TouchableOpacity style={{alignSelf: 'center', marginTop: '10%', marginBottom: '2.5%', marginLeft: '2.5%', marginRight: '2.5%', borderWidth: 1, borderColor: 'white', borderRadius: 5, opacity: menuDisplay ? 0.5 : 1}}
+                        onPress={() => navigate('basketball_ncaab', 'FeedDisplay1')}
+                    >
+                        <Text style={{textAlign: 'center', fontSize: 14, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 10, paddingBottom: 10, fontFamily: 'Baskerville'}}>NCAA Basketball</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{alignSelf: 'center', marginBottom: '2.5%', marginTop: '2.5%', marginLeft: '2.5%', marginRight: '2.5%', borderWidth: 1, borderColor: 'white', borderRadius: 5, opacity: menuDisplay ? 0.5 : 1}}
+                        onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
+                    >
+                        <Text style={{textAlign: 'center', fontSize: 14, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 10, paddingBottom: 10, fontFamily: 'Baskerville'}}>NBA Basketball</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{alignSelf: 'center', marginBottom: '2.5%', marginTop: '2.5%', marginLeft: '2.5%', marginRight: '2.5%',borderWidth: 1, borderColor: 'white', borderRadius: 5, opacity: menuDisplay ? 0.5 : 1}}
+                        // onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
+                    >
+                        <Text style={{textAlign: 'center', fontSize: 14, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 10, paddingBottom: 10, fontFamily: 'Baskerville'}}>MLB Baseball</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{alignSelf: 'center', marginBottom: '2.5%', marginTop: '2.5%', marginLeft: '2.5%', marginRight: '2.5%', borderWidth: 1, borderColor: 'white', borderRadius: 5, opacity: menuDisplay ? 0.5 : 1}}
+                        // onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
+                    >
+                        <Text style={{textAlign: 'center', fontSize: 14, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 10, paddingBottom: 10, fontFamily: 'Baskerville'}}>NFL Football</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{alignSelf: 'center', marginBottom: '10%', marginTop: '2.5%', marginLeft: '2.5%', marginRight: '2.5%', borderWidth: 1, borderColor: 'white', borderRadius: 5, opacity: menuDisplay ? 0.5 : 1}}
+                        // onPress={() => navigate('basketball_nba', 'FeedDisplay2')}
+                    >
+                        <Text style={{textAlign: 'center', fontSize: 14, color: 'white', paddingLeft: 20, paddingRight: 20, paddingTop: 10, paddingBottom: 10, fontFamily: 'Baskerville'}}>European Football</Text>
+                    </TouchableOpacity>
+
+
+                </View>
 
             </View>
 

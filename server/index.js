@@ -48,6 +48,8 @@ app.post(`/notifications`, controller.createNotifications);
 
 app.get(`/auth`, controller.createTestUser);
 
+app.get(`/odds/team`, controller.getOddsByTeamName)
+
 io.on('connection', (socket) => {
 
     socket.on('register', async (userInfo) => {
@@ -62,8 +64,12 @@ io.on('connection', (socket) => {
         controller.handleUserJoiningRoom(socket, room);
     })
 
-    socket.on('leaveRoomEmit', async () => {
-        controller.handleUserLeavingRoom(socket);
+    socket.on('leaveRoomEmit', async (room) => {
+        controller.handleUserLeavingRoom(socket, room);
+    })
+
+    socket.on('userChangesActiveBooks', async (booksActive, userId) => {
+        controller.updateUserBooksActive(booksActive, userId);
     })
 
 });

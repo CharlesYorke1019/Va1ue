@@ -6,6 +6,7 @@ const bycrypt = require('bcryptjs');
 const jsonwebtoken = require('jsonwebtoken');
 const authConfig = require('../config/authConfig');
 const axiosApi = require('../api/api');
+const { ready } = require('@tensorflow/tfjs');
 
 exports.register = async (socket, body) => {
     if (!body.email || !body.password || !body.confirmPassword) {
@@ -36,12 +37,12 @@ exports.logIn = (socket, body) => {
     const email = body.email.toLowerCase();
     const password = body.password;
 
-    User.findOne({ where: { email : email } }).then(data => {
+    User.findOne({ where: { email: email } }).then(data => {
         if (data) {
             if (bycrypt.compareSync(password, data.password)) {
-                
-                const token = jsonwebtoken.sign({email: data.email}, authConfig.secret, {algorithm: 'HS256', expiresIn: 86400})
-                socket.emit('logInSuccessful', {token: token, user: data});
+
+                const token = jsonwebtoken.sign({ email: data.email }, authConfig.secret, { algorithm: 'HS256', expiresIn: 86400 })
+                socket.emit('logInSuccessful', { token: token, user: data });
 
             } else {
                 return;
@@ -67,6 +68,7 @@ exports.createUser = (req, res) => {
     const user = {
         email: req.body.email.toLowerCase(),
         password: hash,
+        booksActive: []
     };
 
     User.create(user).then(data => {
@@ -82,7 +84,7 @@ exports.createUser = (req, res) => {
 }
 
 exports.getUsers = (req, res) => {
-    User.findAll({ attributes: { exclude : ['password'] } }).then(data => {
+    User.findAll({ attributes: { exclude: ['password'] } }).then(data => {
         res.send({
             message: "Request successful!",
             data: data
@@ -101,6 +103,7 @@ exports.createTestUser = (req, res) => {
     const user = {
         email: 'user1',
         password: hash,
+        booksActive: ['all']
     };
 
     User.create(user).then(data => {
@@ -115,7 +118,21 @@ exports.createTestUser = (req, res) => {
 }
 
 exports.feed = async (req, res) => {
-    await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+    const hash = bycrypt.hashSync('Password', 12);
+
+    const user = {
+        email: 'user1',
+        password: hash,
+        booksActive: ['all']
+    };
+
+    await User.create(user).then(data => {
+        return data;
+    }).catch(err => {
+        return 'Error'
+    })
+
+    await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
         let objsArr = data.data;
 
         for (let i = 0; i < objsArr.length; i++) {
@@ -126,6 +143,9 @@ exports.feed = async (req, res) => {
 
                     let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
 
+                    // identifier used to be --> identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price,
+
+
                     let oddsObj = {
                         book: objsArr[i].bookmakers[j].title,
                         team1: slipInfo[0].name,
@@ -134,10 +154,11 @@ exports.feed = async (req, res) => {
                         team2StartingOdds: slipInfo[1].price,
                         team1LiveOdds: slipInfo[0].price,
                         team2LiveOdds: slipInfo[1].price,
-                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
                     }
 
-                    const exists = Odds.count({ where : { book : oddsObj.book } && { team1 : oddsObj.team1 } && { team2 : oddsObj.team2 } })
+                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
 
                     // if (exists === 0) {
 
@@ -171,7 +192,7 @@ exports.feed = async (req, res) => {
 
     })
 
-    await axiosApi().get('v4/sports/basketball_nba/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+    await axiosApi().get('v4/sports/basketball_nba/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
         let objsArr = data.data;
 
         for (let i = 0; i < objsArr.length; i++) {
@@ -190,10 +211,11 @@ exports.feed = async (req, res) => {
                         team2StartingOdds: slipInfo[1].price,
                         team1LiveOdds: slipInfo[0].price,
                         team2LiveOdds: slipInfo[1].price,
-                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name +  '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
                     }
 
-                    const exists = Odds.count({ where : { book : oddsObj.book } && { team1 : oddsObj.team1 } && { team2 : oddsObj.team2 } })
+                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
 
                     // if (exists === 0) {
 
@@ -238,7 +260,7 @@ exports.scanOdds = async (io, type) => {
 
     if (clients) {
 
-        const data1  = await axiosApi().get(`v4/sports/${type}/odds?regions=us&oddsFormat=american&apiKey=9b3749c6f8111824a767b84b1ba41ef4`);
+        const data1 = await axiosApi().get(`v4/sports/${type}/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4`);
 
         let objArr = data1.data;
 
@@ -255,23 +277,43 @@ exports.scanOdds = async (io, type) => {
 
                     let slipInfo = objArr[i].bookmakers[j].markets[0].outcomes;
 
+                    // Odds instance retrieved from our axios call to the Odds API
                     let retrievedOdds = {
                         book: objArr[i].bookmakers[j].title,
                         team1: slipInfo[0].name,
                         team2: slipInfo[1].name,
                         team1Odds: slipInfo[0].price,
                         team2Odds: slipInfo[1].price,
-                        identifier: objArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price
+                        identifier: objArr[i].bookmakers[j].title + '-' + slipInfo[0].name + '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
                     }
 
                     let finalObj = {};
 
-                    await Odds.findOne({ where : { identifier : retrievedOdds.identifier } }).then(data2 => {
+                    let testObj = {
+
+                        team1LiveOdds: retrievedOdds.team1Odds,
+                        team2LiveOdds: retrievedOdds.team2Odds
+
+                    };
+
+                    if (retrievedOdds.team1 === 'Michigan Wolverines' && objArr[i].bookmakers[j].title === 'FanDuel') {
+                        console.log(retrievedOdds);
+                    }
+
+                    await Odds.update(testObj, { where : { identifier : retrievedOdds.identifier } }).then(newData => {
+                        return newData;
+                    }).catch(err => {
+                        return 'Error';
+                    })
+
+                    await Odds.findOne({ where: { identifier: retrievedOdds.identifier } }).then(data2 => {
 
                         if (data2) {
 
+                            // Odds instance found in our database
                             let originalBetInfo = data2.dataValues;
-                            
+
                             let oddsChangeTeam1 = retrievedOdds.team1Odds - originalBetInfo.team1StartingOdds;
                             let oddsChangeTeam2 = retrievedOdds.team2Odds - originalBetInfo.team2StartingOdds;
 
@@ -283,7 +325,7 @@ exports.scanOdds = async (io, type) => {
                                     finalObj.team1OddsChange = oddsChangeTeam1;
                                     finalObj.team1OriginalOdds = originalBetInfo.team1StartingOdds;
                                     finalObj.team1UpdatedOdds = retrievedOdds.team1Odds;
-                                    
+
                                 }
 
                                 if (oddsChangeTeam2 >= 100 || oddsChangeTeam2 <= -100) {
@@ -293,8 +335,6 @@ exports.scanOdds = async (io, type) => {
                                     finalObj.team2OriginalOdds = originalBetInfo.team2StartingOdds;
                                     finalObj.team2UpdatedOdds = retrievedOdds.team2Odds;
 
-                                
-
                                 }
 
                                 finalObj.location = retrievedOdds.book;
@@ -302,7 +342,7 @@ exports.scanOdds = async (io, type) => {
                                 array.push(finalObj);
 
                                 totalNotifications++;
-                
+
                                 let dateHolder = Date.now();
                                 let currentDate = new Date(dateHolder);
 
@@ -310,24 +350,24 @@ exports.scanOdds = async (io, type) => {
 
                                     info: finalObj,
                                     sent: false,
-                                    identifier: retrievedOdds.identifier + ':' + finalObj.team1OriginalOdds + ':' + finalObj.team2OriginalOdds,
+                                    identifier: finalObj.team1 != undefined && finalObj.team2 != undefined ? retrievedOdds.identifier + '-' + retrievedOdds.team1Odds + '-' + retrievedOdds.team2Odds : retrievedOdds.team1 === undefined ? retrievedOdds.identifier + '-' + retrievedOdds.team1Odds : retrievedOdds.identifier + '-' + retrievedOdds.team2Odds , 
                                     committedStamp: currentDate,
-                                    url: finalObj.location === 'FanDuel' ? 'https://account.sportsbook.fanduel.com/sportsbook/' : finalObj.location === 'DraftKings' ? 'https://myaccount.draftkings.com/login' : 'https://account.sportsbook.fanduel.com/sportsbook/',
+                                    link: retrievedOdds.link,
                                     type: type
 
                                 }
 
 
-                                Notifications.count({ where : { identifier :  notificationObj.identifier } }).then(count => {
-                                    
+                                Notifications.count({ where: { identifier: notificationObj.identifier } }).then(count => {
+
                                     if (count === 0) {
 
                                         Notifications.create(notificationObj).then(data3 => {
                                             if (data3) {
-                                                
+
                                                 newNotificationsArray.push(notificationObj)
                                                 return 'Success'
-    
+
                                             }
                                         }).catch(err => {
                                             return 'err';
@@ -344,7 +384,7 @@ exports.scanOdds = async (io, type) => {
                                 team2LiveOdds: retrievedOdds.team2Odds
                             }
 
-                            Odds.update(updateObj, { where : { identifier : originalBetInfo.identifier } }).then(arr => {
+                            Odds.update(updateObj, { where: { identifier: originalBetInfo.identifier } }).then(arr => {
 
                                 if (arr[0]) {
 
@@ -390,7 +430,7 @@ exports.scanOdds = async (io, type) => {
         console.log(notificationArray.length);
 
         io.to(type).emit('receive_ping', JSON.parse(JSON.stringify(notificationArray)));
-        
+
     } else {
 
         console.log('no point');
@@ -409,19 +449,19 @@ exports.updateForTesting = (req, res) => {
 
     }
 
-    Odds.update(obj, { where : { id : id } }).then(arr => {
+    Odds.update(obj, { where: { id: id } }).then(arr => {
 
         if (arr[0]) {
 
-            Odds.findOne({ where : { id : id } }).then(data => {
+            Odds.findOne({ where: { id: id } }).then(data => {
 
                 if (data) {
 
                     res.send({
 
-                      message: 'Success!',
-                      data: data
-                        
+                        message: 'Success!',
+                        data: data
+
                     })
 
                 }
@@ -459,14 +499,33 @@ exports.getOdds = (req, res) => {
 
 }
 
+exports.getOddsByTeamName = (req, res) => {
+
+    Odds.findAll({ where : { team1 : req.body.team } || { team2 : req.body.team } }).then(data => {
+
+        res.send({
+            message: 'Success',
+            data: data
+        })
+
+    }).catch(err => {
+
+        res.send({
+            message: 'Error'
+        })
+
+    })
+
+}
+
 exports.handleUserJoiningRoom = (socket, room) => {
-    
+
     socket.join(room);
 
 }
 
 exports.handleUserLeavingRoom = (socket, room) => {
-    
+
     socket.leave(room);
 
 }
@@ -516,12 +575,12 @@ exports.scanNotifications = async () => {
     let timeRange = currentDate.setMinutes(currentDate.getMinutes() - 3);
 
     await Notifications.findAll().then(data => {
- 
+
         data.forEach((el) => {
 
             if (el.dataValues.committedStamp < timeRange) {
 
-                Notifications.destroy({ where : { identifier : el.dataValues.identifier } }).then(data3 => {
+                Notifications.destroy({ where: { identifier: el.dataValues.identifier } }).then(data3 => {
                     return 'Success'
                 })
 
@@ -530,6 +589,27 @@ exports.scanNotifications = async () => {
         })
 
     })
+
+
+}
+
+exports.updateUserBooksActive = async (booksActive, userId) => {
+
+
+    let userObj = {
+
+        booksActive: booksActive
+
+    }
+
+    await User.update(userObj, { where : { id : userId } }).then(data => {
+
+        return data;
+
+    })
+
+
+
 
 
 }

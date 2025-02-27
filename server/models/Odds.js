@@ -23,6 +23,9 @@ module.exports = (sequelize, Sequelize) => {
         },
         identifier: {
             type: Sequelize.STRING
+        },
+        link: {
+            type: Sequelize.STRING
         }
     });
     return Odds;

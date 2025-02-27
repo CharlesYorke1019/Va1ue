@@ -12,13 +12,17 @@ export function FeedDisplay1({}) {
 
     let tHolder = JSON.parse(JSON.stringify(store.getState().notifications));
 
+    let [booksActiveDisplay, setBooksActiveDisplay] = useState(store.getState().booksActive);
+
     let arrHolder = [];
 
     tHolder.forEach((el) => {
 
         if (el.payload.type === 'basketball_ncaab') {
 
-            arrHolder.push(el)
+            if (booksActiveDisplay.includes('all') || booksActiveDisplay.includes(el.payload.location)) {
+                arrHolder.push(el);
+            }
 
         }
 
@@ -69,20 +73,20 @@ export function FeedDisplay1({}) {
 
             holder.forEach((el) => {
                 if (el.payload.type === 'basketball_ncaab') {
-                    final.push(el);
+                    if (booksActiveDisplay.includes('all') || booksActiveDisplay.includes(el.payload.location)) {
+                        final.push(el);
+                    }
                 }
             })
             
             setData(JSON.parse(JSON.stringify(final))); 
 
-            // setData(JSON.parse(JSON.stringify(store.getState().notifications))); 
-
         });
 
     }, [])
 
-    function navigate(room) {
-        socket.emit('leaveRoomEmit', room)
+    function navigate() {
+        socket.emit('leaveRoomEmit', 'basketball_ncaab')
         navigation.navigate('Home')
     }
 
@@ -95,7 +99,7 @@ export function FeedDisplay1({}) {
                 <View style={{width: '98%', alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginTop: '5%'}}>
 
                     <TouchableOpacity style={{marginBottom: '6%'}}
-                        onPress={() => navigate('basketball_ncaab')}
+                        onPress={() => navigate()}
                     >
                         <Icon name="home" color={'white'} size={28} />
                     </TouchableOpacity>

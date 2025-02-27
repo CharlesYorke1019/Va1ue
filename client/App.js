@@ -8,6 +8,8 @@ import { Index } from "./screens/Index";
 import { Home } from "./screens/Home";
 import { FeedDisplay1 } from "./screens/FeedDisplay1";
 import { FeedDisplay2 } from "./screens/FeedDisplay2";
+import { Account } from "./screens/Account";
+import { Customize } from "./screens/Customize";
 
 const Stack = createStackNavigator();
 
@@ -23,6 +25,8 @@ function App() {
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="FeedDisplay1" component={FeedDisplay1} />
       <Stack.Screen name="FeedDisplay2" component={FeedDisplay2} />
+      <Stack.Screen name="Account" component={Account} />
+      <Stack.Screen name="Customize" component={Customize} />
 
 
     </Stack.Navigator>
