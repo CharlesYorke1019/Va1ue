@@ -4,7 +4,7 @@
 
 # Instructions
 
-* Mobile device must be on same wifi as computer running the app *
+*Mobile device must be on same wifi as computer running the app*
 
 1) Download the code or clone it
 2) Open terminal or command prompt
