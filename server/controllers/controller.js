@@ -1,4 +1,4 @@
-const db = require('../models');
+const { db } = require('../models');
 const User = db.user;
 const Odds = db.odds;
 const Notifications = db.notifications;
@@ -6,7 +6,6 @@ const bycrypt = require('bcryptjs');
 const jsonwebtoken = require('jsonwebtoken');
 const authConfig = require('../config/authConfig');
 const axiosApi = require('../api/api');
-const { ready } = require('@tensorflow/tfjs');
 
 exports.register = async (socket, body) => {
     if (!body.email || !body.password || !body.confirmPassword) {

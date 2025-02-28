@@ -1,10 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const db = require('./models');
+const { db, createTable } = require('./models');
 const controller = require('./controllers/controller');
 const socketIo = require('socket.io');
 const http = require('http');
+
 
 const app = express();
 
@@ -80,9 +81,7 @@ setInterval(async () => {
     controller.scanNotifications();
 }, 20000);
 
-db.sequelize.sync({
-    force: true
-});
+createTable();
 
 app.listen(PORT, () => {
     console.log(`Lets win some money fellas`)
