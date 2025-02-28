@@ -1,16 +1,13 @@
 const io = require('socket.io-client');
+import Constants from "expo-constants";
 
-const makeId = (length) => {
-    var result = '';
-    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
+let hostUri = Constants.expoConfig.hostUri;
 
-const socket = io("http://192.168.1.216:8000", {
+let final = hostUri.substring(0, hostUri.length - 5);
+
+let PORT = 8000;
+
+const socket = io(`http://${final}:${PORT}`, {
     recconection: true, 
     recconectionAttempts: Infinity,
     extraHeaders: {
