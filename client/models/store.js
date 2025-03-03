@@ -9,7 +9,8 @@ const user = createSlice({
     token: '',
     latestUpdate: 'none',
     notifications: [],
-    booksActive: []
+    booksActive: [],
+    channelsActive: []
   },
   reducers: {
 
@@ -18,6 +19,7 @@ const user = createSlice({
       state.email = userData.payload.user.email;
       state.id = userData.payload.user.id;
       state.booksActive = userData.payload.user.booksActive
+      state.channelsActive = userData.payload.user.channelsActive
       state.token = userData.payload.token;
       state.loggedIn = true;
 
@@ -57,6 +59,12 @@ const user = createSlice({
 
     },
 
+    setChannelsActive: (state, channels) => {
+
+      state.channelsActive = channels.payload;
+
+    },
+
     getNotifications: (state) => {
 
       return state.notifications;
@@ -72,7 +80,7 @@ const user = createSlice({
   }
 })
 
-export const { setUserInfoSuccessfulLogIn, setNotifications, setLatestUpdate, getNotifications, getEmail, setBooksActive, setUserInfoLogOut } = user.actions
+export const { setUserInfoSuccessfulLogIn, setNotifications, setLatestUpdate, getNotifications, getEmail, setBooksActive, setUserInfoLogOut, setChannelsActive } = user.actions
 
 export const store = configureStore({
   reducer: user.reducer

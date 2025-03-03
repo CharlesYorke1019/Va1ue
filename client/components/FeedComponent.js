@@ -9,6 +9,8 @@ export function FeedComponent({data}) {
 
     for (let i = data.length - 1; i >= 0; i--) {
 
+        console.log(data[i].payload);
+
         elementsArr.push(
             <View key={i} style={{width: '98%',  alignSelf: 'center', borderStyle: 'solid', borderColor: 'white', borderTopWidth: 2, borderBottomWidth: 2, marginTop: 10, padding: 20, marginBottom: '5%'}}>
                 <Text style={{color: 'white', textAlign: 'center', marginBottom: '2%', fontFamily: 'Baskerville', display: data[i].payload.team1 ? 'flex' : 'none'}}><Text style={{color: 'skyblue', fontWeight: 600}}>{data[i].payload.team1}</Text> has shifted <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1OddsChange}</Text> {"\n"} (started at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1OriginalOdds}</Text> & now at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1UpdatedOdds}</Text>)</Text>

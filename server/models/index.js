@@ -27,7 +27,7 @@ db.odds = require('./Odds')(sequelize, Sequelize);
 db.user = require('./User')(sequelize, Sequelize);
 db.notifications = require('./Notifications')(sequelize, Sequelize);
 
-async function createTable() {
+async function createDatabaseIfNotExists() {
 
     try {
 
@@ -41,7 +41,9 @@ async function createTable() {
 
         } 
 
-        db.sequelize.sync();
+        db.sequelize.sync({
+            force: true
+        });
 
     } catch (error) {
 
@@ -55,4 +57,4 @@ async function createTable() {
 
 }
 
-module.exports = { db, createTable };
+module.exports = { db, createDatabaseIfNotExists };

@@ -1,10 +1,11 @@
-import { View, KeyboardAvoidingView, Platform, TextInput, Text, TouchableOpacity} from "react-native";
+import { View, TextInput, Text, TouchableOpacity} from "react-native";
 import { useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome'
 import socket from "../models/socket";
 
 export function Register({position, setPosition}) {
 
+    const [error, setError] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,6 +21,14 @@ export function Register({position, setPosition}) {
         setPosition(0);
     })
 
+    socket.on('registerFail', () => {
+        setError(true);
+
+        setTimeout(() => {
+            setError(false);
+        }, 5000);
+    })
+
     return (
 
         <View 
@@ -27,6 +36,10 @@ export function Register({position, setPosition}) {
             // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             
+            <View style={{display: error ? 'flex' : 'none', position: 'absolute', alignSelf: 'center', top: '-30%'}}>
+                <Text style={{color: 'white', fontFamily: 'Baskerville', textAlign: 'center'}}>An error has occured while logging in. Please try again</Text>
+            </View>
+
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 15}}>
 
                 <View style={{borderWidth: 1, borderColor: 'white', marginRight: '3%', borderRadius: 5}}>

@@ -1,12 +1,13 @@
-import { View, KeyboardAvoidingView, Platform, TextInput, Text, TouchableOpacity } from "react-native";
+import { View, TextInput, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome'
 import socket from "../models/socket";
-import { router } from "expo-router";
 import { useNavigation } from '@react-navigation/native'
 import { store, setUserInfoSuccessfulLogIn } from "../models/store";
 
 export function LogIn({position, setPosition})   {
+
+    const [error, setError] = useState(false)
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -18,6 +19,16 @@ export function LogIn({position, setPosition})   {
     function userLogsIn() {
         socket.emit('logIn', {email: username, password: password})
     }
+
+    socket.off('logInFail').on('logInFail', () => {
+
+        setError(true);
+
+        setTimeout(() => {
+            setError(false);
+        }, 5000);
+
+    })
 
     socket.off('logInSuccessful').on('logInSuccessful', (userData) => { 
         setUsername('');
@@ -33,6 +44,10 @@ export function LogIn({position, setPosition})   {
             style={{backgroundColor: 'black', position: 'absolute', alignSelf: 'center', top: '40%', width: '80%', display: position === 0 ? 'flex' : 'none'}}
             // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+
+            <View style={{display: error ? 'flex' : 'none', position: 'absolute', alignSelf: 'center', top: '-30%'}}>
+                <Text style={{color: 'white', fontFamily: 'Baskerville', textAlign: 'center'}}>An error has occured while logging in. Please try again</Text>
+            </View>
             
             <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 15}}>
 

@@ -1,11 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const { db, createTable } = require('./models');
+const { createDatabaseIfNotExists } = require('./models');
 const controller = require('./controllers/controller');
 const socketIo = require('socket.io');
 const http = require('http');
-
 
 const app = express();
 
@@ -81,7 +80,7 @@ setInterval(async () => {
     controller.scanNotifications();
 }, 20000);
 
-createTable();
+createDatabaseIfNotExists();
 
 app.listen(PORT, () => {
     console.log(`Lets win some money fellas`)

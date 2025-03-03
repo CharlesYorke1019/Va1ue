@@ -11,6 +11,10 @@ module.exports = (sequelize, Sequelize) => {
 
         booksActive: {
             type: Sequelize.JSON
+        },
+
+        channelsActive: {
+            type: Sequelize.JSON
         }
 
     });

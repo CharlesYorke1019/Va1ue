@@ -20,7 +20,9 @@ exports.register = async (socket, body) => {
 
     const user = {
         email: body.email.toLowerCase(),
-        password: hash
+        password: hash,
+        booksActive: ['all'],
+        channelsActive: ['all']
     };
 
     User.create(user).then(data => {
@@ -28,13 +30,18 @@ exports.register = async (socket, body) => {
         socket.emit('registerSuccessful');
 
     }).catch(err => {
-        return;
+        
+        socket.emit('registerFail');
+
     });
 };
 
 exports.logIn = (socket, body) => {
     const email = body.email.toLowerCase();
     const password = body.password;
+
+    console.log(email);
+    console.log(password);
 
     User.findOne({ where: { email: email } }).then(data => {
         if (data) {
@@ -44,13 +51,17 @@ exports.logIn = (socket, body) => {
                 socket.emit('logInSuccessful', { token: token, user: data });
 
             } else {
-                return;
+                
+                socket.emit('logInFail');
+
             };
         } else {
             return;
         };
     }).catch(err => {
-        return;
+        
+        socket.emit('logInFail');
+
     });
 };
 
@@ -67,7 +78,8 @@ exports.createUser = (req, res) => {
     const user = {
         email: req.body.email.toLowerCase(),
         password: hash,
-        booksActive: []
+        booksActive: [],
+        channelsActive: []
     };
 
     User.create(user).then(data => {
@@ -102,7 +114,8 @@ exports.createTestUser = (req, res) => {
     const user = {
         email: 'user1',
         password: hash,
-        booksActive: ['all']
+        booksActive: [],
+        channelsActive: []
     };
 
     User.create(user).then(data => {
@@ -122,7 +135,8 @@ exports.feed = async (req, res) => {
     const user = {
         email: 'user1',
         password: hash,
-        booksActive: ['all']
+        booksActive: ['all'],
+        channelsActive: ['all']
     };
 
     await User.create(user).then(data => {
@@ -296,7 +310,7 @@ exports.scanOdds = async (io, type) => {
 
                     };
 
-                    if (retrievedOdds.team1 === 'Michigan Wolverines' && objArr[i].bookmakers[j].title === 'FanDuel') {
+                    if (retrievedOdds.team1 === 'Brown Bears') {
                         console.log(retrievedOdds);
                     }
 

@@ -4,19 +4,22 @@ import { router } from "expo-router";
 import socket from "../models/socket";
 import Icon from 'react-native-vector-icons/Entypo'
 import { useNavigation } from '@react-navigation/native'
-import { store, setBooksActive } from "../models/store";
+import { store, setBooksActive, setChannelsActive } from "../models/store";
 
 export function Customize({}) {
 
     const navigation = useNavigation();
 
     const [booksActiveDisplay, setBooksActiveDisplay] = useState(store.getState().booksActive);
+    const [channelsActiveDisplay, setChannelsActiveDisplay] = useState(store.getState().booksActive);
 
     const [initEditBooks, setInitEditBooks] = useState(false);
+    const [initEditChannels, setInitEditChannels] = useState(false);
 
     const [userId, setUserId] = useState(store.getState().id);
 
     let [test, setTest] = useState('');
+    let [test2, setTest2] = useState('');
 
     function navigate() {
         navigation.navigate('Home')
@@ -26,12 +29,9 @@ export function Customize({}) {
 
         if (initEditBooks) {
 
-
             const arrHolder = test.split('_');
 
             const results = arrHolder.filter((el) => el != '');
-
-            console.log(results);
 
             store.dispatch(setBooksActive(results));
 
@@ -101,6 +101,81 @@ export function Customize({}) {
 
     }
 
+    function toggleEditChannels() {
+
+        if (initEditChannels) {
+
+            const arrHolder = test.split('_');
+
+            const results = arrHolder.filter((el) => el != '');
+
+            store.dispatch(setBooksActive(results));
+
+            socket.emit('userChangesActiveChannels', results, userId);
+
+            setTest2('');
+
+            setChannelsActiveDisplay(store.getState().channelsActive);
+
+        } else {
+
+            let str = '';
+
+            channelsActiveDisplay.forEach((el) => {
+                str += el + '_'
+            })
+
+        }
+
+        setInitEditChannels(!initEditChannels);
+    }
+
+    function pressChannelActive(channel) {
+
+        let str = test2;
+
+        if (channel != 'all') {
+
+            if (str.includes('all_')) {
+
+                str = str.replace('all_', '');
+
+            }
+
+            let holder = channel += '_';
+
+            if (str.includes(holder)) {
+
+                str = str.replace(holder, '');
+
+            } else {
+
+                str += holder;
+
+            }
+
+            setTest2(str);
+
+        } else {
+
+            str = 'all_';
+
+            setTest2(str);
+
+        }
+
+    }
+
+    function includedInChannelsActive(channel) {
+
+        if (channelsActiveDisplay.includes(channel)) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
 
     return (
 
@@ -114,15 +189,15 @@ export function Customize({}) {
                     <Icon name="home" color={'white'} size={28} />
                 </TouchableOpacity>
 
-                <Text style={{fontSize: 28, color: 'white', fontFamily: 'Baskerville-Bold', alignSelf: 'center', marginTop: '7.5%', marginBottom: '5%'}}>Books Active</Text>
-
-                <View style={{borderWidth: 1, borderColor: initEditBooks ? 'lightcoral' : 'white', height: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%', alignSelf: 'center', borderRadius: 5}}>
+                <View style={{borderWidth: 1, borderColor: initEditBooks ? 'lightcoral' : 'white', height: '35%', display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%', alignSelf: 'center', borderRadius: 5, marginTop: '10%'}}>
 
                     <TouchableOpacity style={{borderColor: 'white', borderRightWidth: 1, borderBottomWidth: 1, borderTopRightRadius: 1, borderBottomRightRadius: 5, borderBottomLeftRadius: 1, position: 'absolute', left: '0%', top: '0%'}}
                         onPress={() => toggleEditBooks()}
                     >
                         <Text style={{color: 'white', textAlign: 'center', fontFamily: 'Baskerville', padding: 8}}>{!initEditBooks ? 'Edit' : 'Save'}</Text>
                     </TouchableOpacity>
+
+                    <Text style={{fontSize: 28, color: 'white', fontFamily: 'Baskerville-Bold', alignSelf: 'center', marginTop: '-5%', marginBottom: '10%'}}>Books Active</Text>
 
                     <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center'}}>
                         <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, backgroundColor: !initEditBooks && includedInBooksActive('all') ? 'lightcoral' : initEditBooks && test.includes('all_') ? 'lightcoral' : 'black'}} disabled={!initEditBooks}
@@ -182,55 +257,55 @@ export function Customize({}) {
 
                 </View>
 
-                <Text style={{fontSize: 28, color: 'white', fontFamily: 'Baskerville-Bold', alignSelf: 'center', marginTop: '7.5%', marginBottom: '5%'}}>Channels Active</Text>
-
-                <View style={{borderWidth: 1, borderColor: initEditBooks ? 'lightcoral' : 'white', height: '30%', display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%', alignSelf: 'center', borderRadius: 5}}>
+                <View style={{borderWidth: 1, borderColor: initEditChannels ? 'lightcoral' : 'white', height: '35%', display: 'flex', justifyContent: 'center', alignItems: 'center', width: '90%', alignSelf: 'center', borderRadius: 5, marginTop: '10%'}}>
 
                     <TouchableOpacity style={{borderColor: 'white', borderRightWidth: 1, borderBottomWidth: 1, borderTopRightRadius: 1, borderBottomRightRadius: 5, borderBottomLeftRadius: 1, position: 'absolute', left: '0%', top: '0%'}}
-                        // onPress={() => toggleEditBooks()}
+                        onPress={() => toggleEditChannels()}
                     >
-                        <Text style={{color: 'white', textAlign: 'center', fontFamily: 'Baskerville', padding: 8}}>{!initEditBooks ? 'Edit' : 'Save'}</Text>
+                        <Text style={{color: 'white', textAlign: 'center', fontFamily: 'Baskerville', padding: 8}}>{!initEditChannels ? 'Edit' : 'Save'}</Text>
                     </TouchableOpacity>
 
+                    <Text style={{fontSize: 28, color: 'white', fontFamily: 'Baskerville-Bold', alignSelf: 'center', marginTop: '-5%', marginBottom: '10%'}}>Channels Active</Text>
+
                     <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center'}}>
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('all')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, backgroundColor: !initEditChannels && includedInChannelsActive('all') ? 'lightcoral' : initEditChannels && test2.includes('all_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('all')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7, paddingLeft: 17, paddingRight: 17, fontFamily: 'Baskerville'}}>All</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center', marginTop: '3%'}}>
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%'}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('FanDuel')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%', backgroundColor: !initEditChannels && includedInChannelsActive('NCAABASKETBALL') ? 'lightcoral' : initEditChannels && test2.includes('NCAABASKETBALL_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('NCAABASKETBALL')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7,  fontFamily: 'Baskerville', textAlign: 'center'}}>NCAA Basketball</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%'}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('FanDuel')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%', backgroundColor: !initEditChannels && includedInChannelsActive('NBABASKETBALL') ? 'lightcoral' : initEditChannels && test2.includes('NBABASKETBALL_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('NBABASKETBALL')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7,  fontFamily: 'Baskerville', textAlign: 'center'}}>NBA Basketball</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center', marginTop: '3%'}}>
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%'}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('FanDuel')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%', backgroundColor: !initEditChannels && includedInChannelsActive('MLBBASEBALL') ? 'lightcoral' : initEditChannels && test2.includes('MLBBASEBALL_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('MLBBASEBALL')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7,  fontFamily: 'Baskerville', textAlign: 'center'}}>MLB Baseball</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%'}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('FanDuel')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%', backgroundColor: !initEditChannels && includedInChannelsActive('NFLFOOTBALL') ? 'lightcoral' : initEditChannels && test2.includes('NFLFOOTBALL_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('NFLFOOTBALL')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7,  fontFamily: 'Baskerville', textAlign: 'center'}}>NFL Football</Text>
                         </TouchableOpacity>
                     </View>
 
                     <View style={{display: 'flex', flexDirection: 'row', alignSelf: 'center', marginTop: '3%'}}>
-                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%'}} disabled={!initEditBooks}
-                            // onPress={() => pressBookActive('FanDuel')}
+                        <TouchableOpacity style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, marginLeft: '2.5%', width: '40%', backgroundColor: !initEditChannels && includedInChannelsActive('EUROPEANFOOTBALL') ? 'lightcoral' : initEditChannels && test2.includes('EUROPEANFOOTBALL_') ? 'lightcoral' : 'black'}} disabled={!initEditChannels}
+                            onPress={() => pressChannelActive('EUROPEANFOOTBALL')}
                         >
                             <Text style={{color: 'white', paddingTop: 7, paddingBottom: 7,  fontFamily: 'Baskerville', textAlign: 'center'}}>European Football</Text>
                         </TouchableOpacity>
