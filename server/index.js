@@ -5,6 +5,7 @@ const { createDatabaseIfNotExists } = require('./models');
 const controller = require('./controllers/controller');
 const socketIo = require('socket.io');
 const http = require('http');
+const authJwt = require('./middleware')
 
 const app = express();
 
@@ -34,21 +35,23 @@ const socketPORT = 8000;
 
 app.post('/users', controller.createUser);
 
-app.get('/users', controller.getUsers);
+app.get('/users', [authJwt.authJwt.verifyToken], controller.getUsers);
 
-app.get(`/feed`, controller.feed);
+app.get('/account', [authJwt.authJwt.verifyToken], controller.createTestUser);
 
-app.patch(`/odds/:id`, controller.updateForTesting);
+app.patch(`/odds/:id`, [authJwt.authJwt.verifyToken], controller.updateForTesting);
 
-app.get(`/odds`, controller.getOdds);
+app.get(`/odds`, [authJwt.authJwt.verifyToken], controller.getOdds);
 
-app.get(`/notifications`, controller.getNotifications);
+app.get(`/notifications`, [authJwt.authJwt.verifyToken], controller.getNotifications);
 
-app.post(`/notifications`, controller.createNotifications);
+app.post(`/notifications`, [authJwt.authJwt.verifyToken], controller.createNotifications);
 
-app.get(`/auth`, controller.createTestUser);
+app.get(`/auth`, controller.getAuth);
 
-app.get(`/odds/team`, controller.getOddsByTeamName)
+app.get(`/odds/team`, [authJwt.authJwt.verifyToken], controller.getOddsByTeamName);
+
+controller.feed();
 
 io.on('connection', (socket) => {
 
@@ -60,8 +63,8 @@ io.on('connection', (socket) => {
         controller.logIn(socket, userInfo)
     })
 
-    socket.on('joinRoomEmit', async (room) => {
-        controller.handleUserJoiningRoom(socket, room);
+    socket.on('joinRoomEmit', async (room, token) => {
+        controller.handleUserJoiningRoom(socket, room, token);
     })
 
     socket.on('leaveRoomEmit', async (room) => {
@@ -72,11 +75,16 @@ io.on('connection', (socket) => {
         controller.updateUserBooksActive(booksActive, userId);
     })
 
+    socket.on('userChangesActiveChannels', async (channelsActive, userId) => {
+        controller.updateUserChannelsActive(channelsActive, userId);
+    })
+
 });
 
 setInterval(async () => {
     controller.scanOdds(io, 'basketball_ncaab');
     controller.scanOdds(io, 'basketball_nba');
+    controller.scanOdds(io, 'soccer_uefa_champs_league');
     controller.scanNotifications();
 }, 20000);
 

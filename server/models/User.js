@@ -15,6 +15,10 @@ module.exports = (sequelize, Sequelize) => {
 
         channelsActive: {
             type: Sequelize.JSON
+        },
+
+        subscription: {
+            type: Sequelize.STRING
         }
 
     });

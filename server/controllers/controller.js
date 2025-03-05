@@ -96,6 +96,7 @@ exports.createUser = (req, res) => {
 
 exports.getUsers = (req, res) => {
     User.findAll({ attributes: { exclude: ['password'] } }).then(data => {
+        console.log(data);
         res.send({
             message: "Request successful!",
             data: data
@@ -105,166 +106,6 @@ exports.getUsers = (req, res) => {
             message: "Error occured while finding users"
         });
     });
-}
-
-exports.createTestUser = (req, res) => {
-
-    const hash = bycrypt.hashSync('Password', 12);
-
-    const user = {
-        email: 'user1',
-        password: hash,
-        booksActive: [],
-        channelsActive: []
-    };
-
-    User.create(user).then(data => {
-        res.send({
-            message: 'Success',
-            data: data
-        })
-    }).catch(err => {
-        return 'Error'
-    })
-
-}
-
-exports.feed = async (req, res) => {
-    const hash = bycrypt.hashSync('Password', 12);
-
-    const user = {
-        email: 'user1',
-        password: hash,
-        booksActive: ['all'],
-        channelsActive: ['all']
-    };
-
-    await User.create(user).then(data => {
-        return data;
-    }).catch(err => {
-        return 'Error'
-    })
-
-    await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
-        let objsArr = data.data;
-
-        for (let i = 0; i < objsArr.length; i++) {
-
-            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
-
-                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
-
-                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
-
-                    // identifier used to be --> identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price,
-
-
-                    let oddsObj = {
-                        book: objsArr[i].bookmakers[j].title,
-                        team1: slipInfo[0].name,
-                        team2: slipInfo[1].name,
-                        team1StartingOdds: slipInfo[0].price,
-                        team2StartingOdds: slipInfo[1].price,
-                        team1LiveOdds: slipInfo[0].price,
-                        team2LiveOdds: slipInfo[1].price,
-                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + '-' + slipInfo[1].name,
-                        link: slipInfo[0].link
-                    }
-
-                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
-
-                    // if (exists === 0) {
-
-                    //     Odds.create(oddsObj).then(data2 => {
-
-                    //         console.log('Success!')
-
-                    //     }).catch(err => {
-
-                    //         console.log('Error!')
-
-                    //     })
-
-                    // }
-
-                    Odds.create(oddsObj).then(data2 => {
-
-                        return data;
-
-                    }).catch(err => {
-
-                        console.log('Error!')
-
-                    })
-
-                }
-
-            }
-
-        }
-
-    })
-
-    await axiosApi().get('v4/sports/basketball_nba/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
-        let objsArr = data.data;
-
-        for (let i = 0; i < objsArr.length; i++) {
-
-            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
-
-                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
-
-                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
-
-                    let oddsObj = {
-                        book: objsArr[i].bookmakers[j].title,
-                        team1: slipInfo[0].name,
-                        team2: slipInfo[1].name,
-                        team1StartingOdds: slipInfo[0].price,
-                        team2StartingOdds: slipInfo[1].price,
-                        team1LiveOdds: slipInfo[0].price,
-                        team2LiveOdds: slipInfo[1].price,
-                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name +  '-' + slipInfo[1].name,
-                        link: slipInfo[0].link
-                    }
-
-                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
-
-                    // if (exists === 0) {
-
-                    //     Odds.create(oddsObj).then(data2 => {
-
-                    //         console.log('Success!')
-
-                    //     }).catch(err => {
-
-                    //         console.log('Error!')
-
-                    //     })
-
-                    // }
-
-                    Odds.create(oddsObj).then(data2 => {
-
-                        return data;
-
-                    }).catch(err => {
-
-                        console.log('Error!')
-
-                    })
-
-                }
-
-            }
-
-        }
-
-        res.send({
-            message: 'Success!'
-        })
-
-    })
 }
 
 exports.scanOdds = async (io, type) => {
@@ -531,9 +372,16 @@ exports.getOddsByTeamName = (req, res) => {
 
 }
 
-exports.handleUserJoiningRoom = (socket, room) => {
+exports.handleUserJoiningRoom = (socket, room, token) => {
 
-    socket.join(room);
+    jsonwebtoken.verify(token, authConfig.secret, (err, decoded) => {
+        if (err) {
+            return 'error'
+        } else {
+            socket.join(room);
+        }
+    })
+
 
 }
 
@@ -624,5 +472,259 @@ exports.updateUserBooksActive = async (booksActive, userId) => {
 
 
 
+
+}
+
+exports.updateUserChannelsActive = async (channelsActive, userId) => {
+
+    let userObj = {
+
+        channelsActive: channelsActive
+
+    };
+
+    await User.update(userObj, { where : { id : userId } }).then(data => {
+        return data;
+    })
+
+}
+
+exports.getAuth = async (req, res) => {
+
+    const code = req.body.code.toLowerCase();
+    const hash = '$2b$12$/CayrRjCv1pttgL/3bJJyOQMNuhaSMxv/i.VV1nER7/9u9OiWJ96C';
+
+    if (bycrypt.compareSync(code, hash)) {
+
+        const token = jsonwebtoken.sign({ code: code }, authConfig.secret, { algorithm: 'HS256', expiresIn: 86400 });
+
+        res.send({
+            message: 'Success',
+            token: token
+        })
+
+    } else {
+
+        res.send({
+            message: 'Error'
+        })
+
+    }
+
+
+
+}
+
+exports.feed = async () => {
+    // soccer_uefa_champs_league
+
+    await axiosApi().get('v4/sports/basketball_ncaab/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+        let objsArr = data.data;
+
+        for (let i = 0; i < objsArr.length; i++) {
+
+            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
+
+                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
+
+                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
+
+                    // identifier used to be --> identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + ':' + slipInfo[0].price + '-' + slipInfo[1].name + ':' + slipInfo[1].price,
+
+                    let oddsObj = {
+                        book: objsArr[i].bookmakers[j].title,
+                        team1: slipInfo[0].name,
+                        team2: slipInfo[1].name,
+                        team1StartingOdds: slipInfo[0].price,
+                        team2StartingOdds: slipInfo[1].price,
+                        team1LiveOdds: slipInfo[0].price,
+                        team2LiveOdds: slipInfo[1].price,
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name + '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
+                    }
+
+                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
+
+                    // if (exists === 0) {
+
+                    //     Odds.create(oddsObj).then(data2 => {
+
+                    //         console.log('Success!')
+
+                    //     }).catch(err => {
+
+                    //         console.log('Error!')
+
+                    //     })
+
+                    // }
+
+                    Odds.create(oddsObj).then(data2 => {
+
+                        return data;
+
+                    }).catch(err => {
+
+                        console.log('Error!')
+
+                    })
+
+                }
+
+            }
+
+        }
+
+    })
+
+    await axiosApi().get('v4/sports/basketball_nba/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+        let objsArr = data.data;
+
+        for (let i = 0; i < objsArr.length; i++) {
+
+            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
+
+                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
+
+                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
+
+                    let oddsObj = {
+                        book: objsArr[i].bookmakers[j].title,
+                        team1: slipInfo[0].name,
+                        team2: slipInfo[1].name,
+                        team1StartingOdds: slipInfo[0].price,
+                        team2StartingOdds: slipInfo[1].price,
+                        team1LiveOdds: slipInfo[0].price,
+                        team2LiveOdds: slipInfo[1].price,
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name +  '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
+                    }
+
+                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
+
+                    // if (exists === 0) {
+
+                    //     Odds.create(oddsObj).then(data2 => {
+
+                    //         console.log('Success!')
+
+                    //     }).catch(err => {
+
+                    //         console.log('Error!')
+
+                    //     })
+
+                    // }
+
+                    Odds.create(oddsObj).then(data2 => {
+
+                        return data;
+
+                    }).catch(err => {
+
+                        console.log('Error!')
+
+                    })
+
+                }
+
+            }
+
+        }
+
+    })
+
+    await axiosApi().get('v4/sports/soccer_uefa_champs_league/odds?regions=us&oddsFormat=american&includeLinks=true&apiKey=9b3749c6f8111824a767b84b1ba41ef4').then(data => {
+        let objsArr = data.data;
+
+        for (let i = 0; i < objsArr.length; i++) {
+
+            for (let j = 0; j < objsArr[i].bookmakers.length; j++) {
+
+                if (objsArr[i].bookmakers[j].markets[0].outcomes != undefined) {
+
+                    let slipInfo = objsArr[i].bookmakers[j].markets[0].outcomes;
+
+                    let oddsObj = {
+                        book: objsArr[i].bookmakers[j].title,
+                        team1: slipInfo[0].name,
+                        team2: slipInfo[1].name,
+                        team1StartingOdds: slipInfo[0].price,
+                        team2StartingOdds: slipInfo[1].price,
+                        team1LiveOdds: slipInfo[0].price,
+                        team2LiveOdds: slipInfo[1].price,
+                        identifier: objsArr[i].bookmakers[j].title + '-' + slipInfo[0].name +  '-' + slipInfo[1].name,
+                        link: slipInfo[0].link
+                    }
+
+                    const exists = Odds.count({ where: { book: oddsObj.book } && { team1: oddsObj.team1 } && { team2: oddsObj.team2 } })
+
+                    // if (exists === 0) {
+
+                    //     Odds.create(oddsObj).then(data2 => {
+
+                    //         console.log('Success!')
+
+                    //     }).catch(err => {
+
+                    //         console.log('Error!')
+
+                    //     })
+
+                    // }
+
+                    Odds.create(oddsObj).then(data2 => {
+
+                        return data;
+
+                    }).catch(err => {
+
+                        console.log('Error!')
+
+                    })
+
+                }
+
+            }
+
+        }
+    })
+}
+
+exports.createTestUser = async (req, res) => {
+
+    const hash = bycrypt.hashSync('Password', 12);
+
+    const user = {
+        email: 'user1',
+        password: hash,
+        booksActive: ['all'],
+        channelsActive: ['all'],
+        subscription: 'none'
+    };
+
+    await User.create(user).then(data => {
+        res.send({
+            message: "Success"
+        })
+    }).catch(err => {
+        res.send({
+            message: "Error"
+        })
+    })
+
+}
+
+exports.deleteOdds = async (req, res) => {
+
+    await Odds.delete({ where : {}, truncate: true }).then(data => {
+        res.send({
+            message: "Successful"
+        })
+    }).catch(err => {
+        res.send({
+            message: "Error"
+        })
+    })
 
 }

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Va1ue",
-    "slug": "Va1ue",
+    "slug": "va1ue",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -34,6 +34,12 @@
       "expo-font",
       "expo-asset"
     ],
-    "newArchEnabled": true
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "7ffb804d-b718-4d25-b90f-3e2d0e6f67e3"
+      }
+    },
+    "owner": "clyde1019"
   }
 }

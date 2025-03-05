@@ -1,6 +1,5 @@
-import { SafeAreaView, View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { SafeAreaView, View, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
-import { router } from "expo-router";
 import socket from "../models/socket";
 import Icon from 'react-native-vector-icons/Entypo'
 import { useNavigation } from '@react-navigation/native'
@@ -11,7 +10,7 @@ export function Customize({}) {
     const navigation = useNavigation();
 
     const [booksActiveDisplay, setBooksActiveDisplay] = useState(store.getState().booksActive);
-    const [channelsActiveDisplay, setChannelsActiveDisplay] = useState(store.getState().booksActive);
+    const [channelsActiveDisplay, setChannelsActiveDisplay] = useState(store.getState().channelsActive);
 
     const [initEditBooks, setInitEditBooks] = useState(false);
     const [initEditChannels, setInitEditChannels] = useState(false);
@@ -33,13 +32,17 @@ export function Customize({}) {
 
             const results = arrHolder.filter((el) => el != '');
 
-            store.dispatch(setBooksActive(results));
+            if (results.length > 0) {
 
-            socket.emit('userChangesActiveBooks', results, userId);
+                store.dispatch(setBooksActive(results));
+
+                socket.emit('userChangesActiveBooks', results, userId);
+    
+                setBooksActiveDisplay(store.getState().booksActive);
+
+            }
 
             setTest('');
-
-            setBooksActiveDisplay(store.getState().booksActive);
 
         } else {
             let str = '';
@@ -105,17 +108,21 @@ export function Customize({}) {
 
         if (initEditChannels) {
 
-            const arrHolder = test.split('_');
+            const arrHolder = test2.split('_');
 
             const results = arrHolder.filter((el) => el != '');
 
-            store.dispatch(setBooksActive(results));
+            if (results.length > 0) {
 
-            socket.emit('userChangesActiveChannels', results, userId);
+                store.dispatch(setChannelsActive(results));
+
+                socket.emit('userChangesActiveChannels', results, userId);
+
+                setChannelsActiveDisplay(store.getState().channelsActive);
+
+            }
 
             setTest2('');
-
-            setChannelsActiveDisplay(store.getState().channelsActive);
 
         } else {
 
@@ -175,7 +182,6 @@ export function Customize({}) {
         }
 
     }
-
 
     return (
 
