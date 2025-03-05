@@ -1,6 +1,5 @@
 import { View, TouchableOpacity, Text, ScrollView } from "react-native";
 import { useRouter } from 'expo-router'
-import Icon from 'react-native-vector-icons/Entypo'
 
 
 export function FeedComponent({data}) {
@@ -15,9 +14,6 @@ export function FeedComponent({data}) {
 
         elementsArr.push(
             <View key={i} style={{width: '100%',  alignSelf: 'center', borderStyle: 'solid', borderColor: 'white', borderTopWidth: 2, borderBottomWidth: 2, marginTop: 10, padding: 20, marginBottom: '5%'}}>
-                {/* <Text style={{color: 'white', textAlign: 'center', marginBottom: '2%', fontFamily: 'Baskerville', display: data[i].payload.team1 ? 'flex' : 'none'}}><Text style={{color: 'skyblue', fontWeight: 600}}>{data[i].payload.team1}</Text> has shifted <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1OddsChange}</Text> {"\n"} (started at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1OriginalOdds}</Text> & now at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team1UpdatedOdds}</Text>)</Text>
-                <Text style={{color: 'white', textAlign: 'center', marginBottom: '2%', fontFamily: 'Baskerville', display: data[i].payload.team2 ? 'flex' : 'none'}}><Text style={{color: 'skyblue', fontWeight: 600}}>{data[i].payload.team2}</Text> has shifted <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team2OddsChange}</Text> {"\n"} (started at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team2OriginalOdds}</Text> & now at <Text style={{color: 'lightcoral', fontWeight: 600}}>{data[i].payload.team2UpdatedOdds}</Text>)</Text>
-                <Text style={{color: 'white', textAlign: 'center', fontFamily: 'Baskerville'}}>Location: <Text style={{color: 'skyblue', textDecorationLine: 'underline', fontWeight: 600}}>{data[i].payload.location}</Text></Text> */}
 
                 <Text style={{color: 'white', fontFamily: 'Baskerville', textAlign: 'center', alignSelf: 'center', marginBottom: '2%'}}><Text style={{fontWeight: 600}}>{data[i].payload.team1}</Text> has shifted <Text style={{fontWeight: 600}}>{returnOddsWithCorrectSign(data[i].payload.team1OddsChange)}</Text> in odds</Text>
 
